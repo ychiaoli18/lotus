@@ -261,6 +261,7 @@ var sealBenchCmd = &cli.Command{
 
 		var sealTimings []SealingResult
 		var sealedSectors []saproof2.SectorInfo
+		var bo BenchResults
 
 		if robench == "" {
 			var err error
@@ -272,6 +273,14 @@ var sealBenchCmd = &cli.Command{
 			sealTimings, sealedSectors, err = runSeals(sb, sbfs, sectorNumber, parCfg, mid, sectorSize, []byte(c.String("ticket-preimage")), c.String("save-commit2-input"), skipc2, c.Bool("skip-unseal"))
 			if err != nil {
 				return xerrors.Errorf("failed to run seals: %w", err)
+			}
+
+			bo.SectorSize = sectorSize
+			bo.SectorNumber = sectorNumber
+			bo.SealingResults = sealTimings
+
+			if err := bo.SumSealingTime(); err != nil {
+				return err
 			}
 		} else {
 			// TODO: implement sbfs.List() and use that for all cases (preexisting sectorbuilder or not)
@@ -302,15 +311,6 @@ var sealBenchCmd = &cli.Command{
 					SealProof:    s.ProofType,
 				})
 			}
-		}
-
-		bo := BenchResults{
-			SectorSize:     sectorSize,
-			SectorNumber:   sectorNumber,
-			SealingResults: sealTimings,
-		}
-		if err := bo.SumSealingTime(); err != nil {
-			return err
 		}
 
 		var challenge [32]byte
