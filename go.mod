@@ -53,7 +53,7 @@ require (
 	github.com/filecoin-project/specs-actors/v7 v7.0.0-20211118013026-3dce48197cec
 	github.com/filecoin-project/specs-storage v0.1.1-0.20211213202648-f14267c929ff
 	github.com/filecoin-project/test-vectors/schema v0.0.5
-	github.com/gabriel-vasile/mimetype v1.4.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/gbrlsnchs/jwt/v3 v3.0.1
 	github.com/gdamore/tcell/v2 v2.2.0
 	github.com/go-kit/kit v0.12.0
