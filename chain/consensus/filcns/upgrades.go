@@ -5,8 +5,6 @@ import (
 	"runtime"
 	"time"
 
-	autobatch "github.com/application-research/go-bs-autobatch"
-
 	"github.com/filecoin-project/specs-actors/v6/actors/migration/nv14"
 	"github.com/filecoin-project/specs-actors/v7/actors/migration/nv15"
 
@@ -1264,14 +1262,7 @@ func upgradeActorsV7Common(
 	root cid.Cid, epoch abi.ChainEpoch, ts *types.TipSet,
 	config nv15.Config,
 ) (cid.Cid, error) {
-	writeStore, err := autobatch.NewBlockstore(sm.ChainStore().StateBlockstore(), blockstore.NewMemorySync(), 100_000, 100, true)
-	if err != nil {
-		return cid.Undef, xerrors.Errorf("failed to create writeStore: %w", err)
-	}
-
-	buf := blockstore.NewTieredBstore(sm.ChainStore().StateBlockstore(), writeStore)
-	store := store.ActorStore(ctx, buf)
-
+	store := store.ActorStore(ctx, sm.ChainStore().StateBlockstore())
 	// Load the state root.
 	var stateRoot types.StateRoot
 	if err := store.Get(ctx, root, &stateRoot); err != nil {
@@ -1299,17 +1290,6 @@ func upgradeActorsV7Common(
 	})
 	if err != nil {
 		return cid.Undef, xerrors.Errorf("failed to persist new state root: %w", err)
-	}
-
-	// Persist the new tree.
-
-	{
-		from := buf
-		to := buf.Read()
-
-		if err := vm.Copy(ctx, from, to, newRoot); err != nil {
-			return cid.Undef, xerrors.Errorf("copying migrated tree: %w", err)
-		}
 	}
 
 	return newRoot, nil
